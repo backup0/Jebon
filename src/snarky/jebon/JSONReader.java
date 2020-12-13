@@ -3,12 +3,13 @@ package snarky.jebon;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.PrimitiveIterator;
 
 public class JSONReader {
 
     private final int queueIndex = 0;
     private final ArrayList<ObjectHandler> objQueue = new ArrayList<>();
-    private final char[] chars;
+    private final PrimitiveIterator.OfInt chars;
     private int index = 0;
 
     private final JebonTree jTree;
@@ -44,7 +45,10 @@ public class JSONReader {
 
         try {
             final String s = Files.readString(Paths.get("D:\\etemp\\json-exp.json" ));
-            chars = s.toCharArray();
+
+            chars = s.codePoints().iterator();
+
+            //chars = s.codePoints().toArray();
             final boolean isObj = findOpener();
             jTree = new JebonTree(isObj);
             if (isObj) {
@@ -63,7 +67,7 @@ public class JSONReader {
 
         while (!objQueue.isEmpty()) {
 
-            if (index >= chars.length) {
+            if (!chars.hasNext()) {
                 // queue isn't empty, but we're run out of text.
                 throw new RuntimeException("W00tz");
             }
@@ -73,9 +77,9 @@ public class JSONReader {
         }
 
         // whitespaces after final } or ] are ok.
-        while (index < chars.length) {
+        while (chars.hasNext()) {
 
-            char c = chars[index++];
+            final String c = Character.toString(chars.nextInt());
             if (!Helper.isWhiteSpace(c)) {
                 throw new RuntimeException("Danglings stuff ...");
             }
@@ -84,9 +88,11 @@ public class JSONReader {
 
     private void processObject(ObjectHandler o) throws JebonException {
 
-        while (index < chars.length) {
+        while (chars.hasNext()) {
 
-            final char c = chars[index++];
+            final int codePoint = chars.nextInt();
+
+            final String c = Character.toString(codePoint);
             // found a new object
             // we process it.
             final ObjectHandler.ReturnFlag f = o.update(c);
@@ -109,21 +115,25 @@ public class JSONReader {
 
     private boolean findOpener() {
 
-        while (index < chars.length) {
+        while (chars.hasNext()) {
 
-            final char c = chars[index++];
+            final String c = Character.toString(chars.nextInt());
             if (Helper.isWhiteSpace(c)) {
                 continue;
             }
 
-            if (c == '{') {
+            if (c.equals("{")) {
                 return true;
             }
 
-            if (c == '[') {
+            if (c.equals("[")) {
                 return false;
             }
         }
         throw new RuntimeException("Probably invalid JSON.");
+    }
+
+    public String toString() {
+        return jTree.toString();
     }
 }

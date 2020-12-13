@@ -7,7 +7,7 @@ class NumberFinder extends Finder {
     private boolean done = false;
 
     @Override
-    protected void update(char c) throws JebonException {
+    protected void update(String c) throws JebonException {
 
         if (Helper.isTerminator(c)) {
             // if terminator end immediately, we've read the entire field

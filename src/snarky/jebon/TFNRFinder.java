@@ -10,7 +10,7 @@ class TFNRFinder extends Finder {
     boolean done = false;
 
     @Override
-    protected void update(char c) throws JebonException {
+    protected void update(String c) throws JebonException {
 
         if (Helper.isTerminator(c)) {
             rtnVal = getItem();

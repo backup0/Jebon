@@ -215,26 +215,28 @@ public class JSONCreator {
     }
 
     /**
-     * Check is name is integer.
-     * @param s
+     * Check if name is integer.
+     * @param name
      * @return blank string if not, else return the string.
      */
-    private String intAsNameCheck(String s) {
+    private String intAsNameCheck(String name) {
+
+        final String c = Character.toString(name.codePointAt(0));
         // what if string = 0?
         // error - can we use empty string as name? Don't think so.
-        // so this will throw exception if s length is 0.
-        if (!Helper.isNumber(s.charAt(0))) {
+        // so this will throw exception if name length is 0.
+        if (!Helper.isNumber(c)) {
             return "";
         }
 
         boolean isNumber = false;
-        for (char c : s.toCharArray()) {
-            isNumber = Helper.isNumber(c);
+        for (int i : c.codePoints().toArray()) {
+            isNumber = Helper.isNumber(Character.toString(i));
             if (!isNumber) {
                 break;
             }
         }
         // todo: correct or not correct?
-        return (isNumber ? s : "");
+        return (isNumber ? name : "");
     }
 }
