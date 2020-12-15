@@ -5,8 +5,6 @@ import java.util.Arrays;
 
 public class JSONCreator {
 
-    // Todo: check escaped characters, etc... LATER. Now let's just accept whatever sent by the user.
-
     private final JebonTree jTree;
 
     /**
@@ -23,7 +21,7 @@ public class JSONCreator {
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
      */
-    public void put(String val, String... keys) {
+    public void put(String val, String... keys) throws JebonException {
         putItem(new JSONItem("", JSONTypes.STRING, val), keys);
     }
 
@@ -33,7 +31,7 @@ public class JSONCreator {
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
      */
-    public void put(double val, String... keys) {
+    public void put(double val, String... keys) throws JebonException {
         putItem(new JSONItem("", JSONTypes.NUMBER, val), keys);
     }
 
@@ -43,7 +41,7 @@ public class JSONCreator {
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
      */
-    public void put(boolean val, String... keys) {
+    public void put(boolean val, String... keys) throws JebonException {
         putItem(new JSONItem("", JSONTypes.BOOLEAN, val), keys);
     }
 
@@ -53,7 +51,7 @@ public class JSONCreator {
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
      */
-    public void put(SpecialType val, String... keys) {
+    public void put(SpecialType val, String... keys) throws JebonException {
         switch (val) {
 
             case JSONObject:
@@ -66,11 +64,11 @@ public class JSONCreator {
                 putItem(new JSONItem("", JSONTypes.NULL, val), keys);
                 break;
             default:
-                throw new RuntimeException();
+                break;
         }
     }
 
-    private void putItem(JSONItem item, String... keys) {
+    private void putItem(JSONItem item, String... keys) throws JebonException {
 
         final ArrayList<String> keyFragments = new ArrayList<>(Arrays.asList(keys));
         final String lastKey = keyFragments.remove(keyFragments.size() - 1);
@@ -98,7 +96,7 @@ public class JSONCreator {
             else {
                 // not an object.
                 // can't insert into non object.
-                throw new RuntimeException("jebon says not an object/array");
+                throw new JebonException("Key does not point to object/array");
             }
         }
         jTree.addItem(index, new JSONItem(lastKey, item.getType(), item.getValue()));
@@ -209,7 +207,7 @@ public class JSONCreator {
                 s = "null";
                 break;
             default:
-                throw new RuntimeException("type does not exists.");
+                throw new RuntimeException("Program error. Not implemented.");
         }
         return s;
     }

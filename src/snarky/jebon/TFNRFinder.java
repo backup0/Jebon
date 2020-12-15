@@ -15,7 +15,7 @@ class TFNRFinder extends Finder {
         if (Helper.isTerminator(c)) {
             rtnVal = getItem();
             if (rtnVal == null) {
-                throw new JebonException("Unexpected value.");
+                throw new JebonException("Unexpected character.");
             }
             return;
         }
@@ -30,7 +30,7 @@ class TFNRFinder extends Finder {
         }
         else {
             if (!Helper.isWhiteSpace(c)) {
-                throw new RuntimeException("Unexpected character");
+                throw new JebonException("Unexpected character");
             }
         }
     }

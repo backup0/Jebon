@@ -1,7 +1,8 @@
 package snarky.jebon;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.PrimitiveIterator;
 
@@ -10,57 +11,51 @@ public class JSONReader {
     private final int queueIndex = 0;
     private final ArrayList<ObjectHandler> objQueue = new ArrayList<>();
     private final PrimitiveIterator.OfInt chars;
-    private int index = 0;
+    //private int index = 0;
 
     private final JebonTree jTree;
 
-    public static void zyx () throws Exception{
-
-        byte[] b = Files.readAllBytes(Paths.get("D:\\etemp\\json-exp.json" ));
-        String s0 = new String(b);
-        final String s = Files.readString(Paths.get("D:\\etemp\\json-exp.json" ));
-
-        JSONReader ds = new JSONReader();
-
-        /*
-        "obj1", "array", "#1" = x <-- put x inside "array" @ position 1;
-        "obj1", "array", "#1" = y <-- new value overrides? What if ne value is obj and vice versa?
-
-        "obj1", "array", "#1", "val1" = x <-- insert an object inside "array" @ position 1; then insert val1.
-        YES it is that complicated. Here's the plan
-        >> allow user to add object 'on the fly', just by stating liek my simpel json
-        >> stuff inside array? if it has ONE #, followed by a number(s) and nothing else, it's an array So if you want
-        >> "#" as name, then use that.
-        >> "#1" as name, then use ## twice. ##1 -> #1
-        Why not .. why no use alternative way? Why? You can ise a list, or you can use specual object.
-
-         */
-
-
-        //NumberFinder nf = new NumberFinder();
-        //nf.test0(s0);
+    public JSONReader(byte[] b) throws JebonException {
+        this(new String(b, StandardCharsets.UTF_8));
     }
 
-    public JSONReader() {
+    public JSONReader(Path p) throws JebonException {
 
         try {
-            final String s = Files.readString(Paths.get("D:\\etemp\\json-exp.json" ));
-
+            final String s = Files.readString(p);
             chars = s.codePoints().iterator();
 
-            //chars = s.codePoints().toArray();
             final boolean isObj = findOpener();
             jTree = new JebonTree(isObj);
-            if (isObj) {
-                objQueue.add(new ObjectHandler(true, jTree, JebonTree.ROOT_INDEX));
-            }
-            else {
-                objQueue.add(new ObjectHandler(false, jTree, JebonTree.ROOT_INDEX));
-            }
-            process();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            readJSON(isObj);
         }
+        catch (Exception e) {
+            throw new JebonException(e.getMessage());
+        }
+    }
+
+    public JSONReader(String s) throws JebonException {
+
+        try {
+            chars = s.codePoints().iterator();
+
+            final boolean isObj = findOpener();
+            jTree = new JebonTree(isObj);
+            readJSON(isObj);
+        } catch (Exception e) {
+            throw new JebonException(e.getMessage());
+        }
+    }
+
+    private void readJSON(boolean isObj) throws JebonException {
+
+        if (isObj) {
+            objQueue.add(new ObjectHandler(true, jTree, JebonTree.ROOT_INDEX));
+        }
+        else {
+            objQueue.add(new ObjectHandler(false, jTree, JebonTree.ROOT_INDEX));
+        }
+        process();
     }
 
     private void process() throws JebonException {
@@ -69,7 +64,7 @@ public class JSONReader {
 
             if (!chars.hasNext()) {
                 // queue isn't empty, but we're run out of text.
-                throw new RuntimeException("W00tz");
+                throw new RuntimeException("Syntax error.");
             }
             // once done the obj is removed
             // no problem.
@@ -81,7 +76,7 @@ public class JSONReader {
 
             final String c = Character.toString(chars.nextInt());
             if (!Helper.isWhiteSpace(c)) {
-                throw new RuntimeException("Danglings stuff ...");
+                throw new JebonException("Wayward character(s).");
             }
         }
     }
@@ -113,7 +108,7 @@ public class JSONReader {
         }
     }
 
-    private boolean findOpener() {
+    private boolean findOpener() throws JebonException {
 
         while (chars.hasNext()) {
 
@@ -130,7 +125,7 @@ public class JSONReader {
                 return false;
             }
         }
-        throw new RuntimeException("Probably invalid JSON.");
+        throw new JebonException("Probably invalid JSON.");
     }
 
     public String toString() {

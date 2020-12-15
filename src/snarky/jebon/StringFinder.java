@@ -39,7 +39,7 @@ class StringFinder extends Finder {
                 processTerminator(c);
                 break;
             default:
-                throw new RuntimeException("Program error.");
+                throw new RuntimeException("Program error. Not implemented.");
         }
     }
 
@@ -102,7 +102,7 @@ class StringFinder extends Finder {
         }
     }
 
-    private void appendEscapedCharacter(String c) {
+    private void appendEscapedCharacter(String c) throws JebonException {
         // {'u', '"','\\', '/', 'b', 'f', 'n', 'r', 't'};
         switch (c) {
             case "\"":
@@ -130,7 +130,7 @@ class StringFinder extends Finder {
                 sbs.append("\t");
                 break;
             default:
-                throw new RuntimeException("Program error.");
+                throw new JebonException("Illegal escaped character.");
         }
     }
 

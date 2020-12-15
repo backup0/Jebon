@@ -66,7 +66,7 @@ class ObjectHandler {
                 rtn = findObjectEnding(c);
                 break;
             default:
-                throw new RuntimeException();
+                throw new RuntimeException("Program error. Not implemented.");
         }
         return rtn;
     }
@@ -104,7 +104,7 @@ class ObjectHandler {
         return rtn;
     }
 
-    private ReturnFlag findObjectEnding(String c) {
+    private ReturnFlag findObjectEnding(String c) throws JebonException {
         // the value is an object(or an array)
         // this is handled by an instance of this class, when read is done, we try to find the terminator
         if (Helper.isWhiteSpace(c)) {
@@ -155,11 +155,11 @@ class ObjectHandler {
                 jsonTree.addItem(treeIndex, nullVal);
                 break;
             default:
-                throw new RuntimeException();
+                throw new RuntimeException("Program error. Not implemented.");
         }
     }
 
-    private ReturnFlag findTheStartOfName(String c) {
+    private ReturnFlag findTheStartOfName(String c) throws JebonException {
         // while reading name space is allowed.
         if (Helper.isWhiteSpace(c)) {
             return ReturnFlag.CONTINUE;
@@ -183,7 +183,7 @@ class ObjectHandler {
             op = Operations.READ_NAME;
         }
         else {
-            throw new RuntimeException();
+            throw new JebonException("Unexpected character.");
         }
         return ReturnFlag.CONTINUE;
     }
@@ -198,7 +198,7 @@ class ObjectHandler {
         }
     }
 
-    private void findColon(String c) {
+    private void findColon(String c) throws JebonException {
         if (Helper.isWhiteSpace(c)) {
             return;
         }
@@ -209,7 +209,7 @@ class ObjectHandler {
         }
         else {
             // exception
-            throw new RuntimeException();
+            throw new JebonException("Unexpected character.");
         }
     }
 
@@ -263,12 +263,12 @@ class ObjectHandler {
                 rtn = ReturnFlag.CONTINUE;
                 break;
             default:
-                throw new RuntimeException();
+                throw new JebonException("Unexpected character.");
         }
         return rtn;
     }
 
-    private void checkTerminator(String c) {
+    private void checkTerminator(String c) throws JebonException {
 
         final boolean ok;
         if (isObject) {
@@ -284,7 +284,7 @@ class ObjectHandler {
         }
 
         if (!ok) {
-            throw new RuntimeException();
+            throw new JebonException("Unexpected character");
         }
     }
 
