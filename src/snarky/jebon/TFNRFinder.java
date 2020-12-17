@@ -10,12 +10,12 @@ class TFNRFinder extends Finder {
     boolean done = false;
 
     @Override
-    protected void update(String c) throws JebonException {
+    protected void update(char c) throws JebonException {
 
         if (Helper.isTerminator(c)) {
             rtnVal = getItem();
             if (rtnVal == null) {
-                throw new JebonException("Unexpected character.");
+                throw new JebonException("Unexpected value.");
             }
             return;
         }

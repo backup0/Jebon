@@ -20,7 +20,7 @@ class StringFinder extends Finder {
     private final StringBuilder unicodeBuffer1 = new StringBuilder();
     private final StringBuilder unicodeBuffer2 = new StringBuilder();
 
-    protected void update(String c) throws JebonException {
+    protected void update(char c) throws JebonException {
 
         switch (charTypeToSearch) {
             case ESCAPE:
@@ -43,7 +43,7 @@ class StringFinder extends Finder {
         }
     }
 
-    private void processTerminator(String c) throws JebonException {
+    private void processTerminator(char c) throws JebonException {
 
         if (Helper.isTerminator(c)) {
             rtnValue = new JSONItem("", JSONTypes.STRING, sbs.toString());
@@ -56,24 +56,23 @@ class StringFinder extends Finder {
         }
     }
 
-    private void processEscapedChar(String c) throws JebonException {
+    private void processEscapedChar(char c) throws JebonException {
 
         // ",\, /, b, f, n, r, t, uhex
-        final String[] escChars = new String[]{"u", "\"","\\", "/", "b", "f", "n", "r", "t"};
+        final char[] escChars = new char[]{'u', '"', '\\', '/', 'b', 'f', 'n', 'r', 't'};
         boolean ok = false;
-        for (String es : escChars) {
-            // ignore case, yes.
-            if (c.equalsIgnoreCase(es)) {
+        for (char o : escChars) {
+            if (c == o) {
                 ok = true;
                 break;
             }
         }
 
         if (!ok) {
-            throw new JebonException("Unexpected escaped character: " + c + ".");
+            throw new JebonException("Unexpected character: " + c + ".");
         }
 
-        if (c.equalsIgnoreCase(escChars[0])) {
+        if (c == escChars[0]) {
             // find hex next
             charTypeToSearch = CharacterTypes.UNICODE;
         }
@@ -83,16 +82,16 @@ class StringFinder extends Finder {
         }
     }
 
-    private void processAnyCharacter(String c) throws JebonException {
+    private void processAnyCharacter(char c) {
 
         switch (c) {
-            case "\"":
+            case '"':
                 // opening " isn't sent to this class.
                 charTypeToSearch = CharacterTypes.TERMINATOR;
-                validateString();
+                //validateString();
                 stringRead = true;
                 break;
-            case "\\":
+            case '\\':
                 charTypeToSearch = CharacterTypes.ESCAPE;
                 break;
             default:
@@ -102,31 +101,31 @@ class StringFinder extends Finder {
         }
     }
 
-    private void appendEscapedCharacter(String c) throws JebonException {
+    private void appendEscapedCharacter(char c) throws JebonException {
         // {'u', '"','\\', '/', 'b', 'f', 'n', 'r', 't'};
         switch (c) {
-            case "\"":
+            case '"':
                 sbs.append("\"");
                 break;
-            case "\\":
+            case '\\':
                 sbs.append("\\");
                 break;
-            case "/":
+            case '/':
                 sbs.append("/");
                 break;
-            case "b":
+            case 'b':
                 sbs.append("\b");
                 break;
-            case "f":
+            case 'f':
                 sbs.append("\f");
                 break;
-            case "n":
+            case 'n':
                 sbs.append("\n");
                 break;
-            case "r":
+            case 'r':
                 sbs.append("\r");
                 break;
-            case "t":
+            case 't':
                 sbs.append("\t");
                 break;
             default:
@@ -134,7 +133,7 @@ class StringFinder extends Finder {
         }
     }
 
-    private void processUnicodeLow(String c) throws JebonException {
+    private void processUnicodeLow(char c) throws JebonException {
 
         final String unicodeBuffer2Flag = "?";
         if (unicodeBuffer2.length() > 0) {
@@ -145,7 +144,7 @@ class StringFinder extends Finder {
                 // which is unicode escape ???
                 unicodeBuffer2.setLength(0);
                 // the buffer has to be reset anyway whether we're looking for low surrogate or else.
-                if (c.equalsIgnoreCase("u")) {
+                if (c == 'u') {
                     // search unicode character as usual
                     charTypeToSearch = CharacterTypes.UNICODE;
                 }
@@ -164,7 +163,7 @@ class StringFinder extends Finder {
         else {
             // still empty, so we're looking @ the first character, which should be \
             // anything else is not escape character.
-            if (c.equals("\\")) {
+            if (c == '\\') {
                 // 'flag it'
                 unicodeBuffer2.append(unicodeBuffer2Flag);
             }
@@ -185,7 +184,7 @@ class StringFinder extends Finder {
         unicodeBuffer2.setLength(0);
     }
 
-    private void processUniCode(String c) throws JebonException {
+    private void processUniCode(char c) throws JebonException {
 
         // method throws exception
         checkIfCharLegal(c);
@@ -228,14 +227,14 @@ class StringFinder extends Finder {
         }
     }
 
-    private void checkIfCharLegal(String c) throws JebonException {
+    private void checkIfCharLegal(char c) throws JebonException {
 
-        final String[] allowedChars;
-        allowedChars = new String[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
+        final char[] allowedChars;
+        allowedChars = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
         boolean ok = false;
-        for (String c1 : allowedChars) {
+        for (char ac : allowedChars) {
             // hex, any case should be fine
-            if (c.equalsIgnoreCase(c1)) {
+            if (c == ac) {
                 ok = true;
                 break;
             }
@@ -249,10 +248,18 @@ class StringFinder extends Finder {
 
     private void validateString() throws JebonException {
 
+        //Jebon.w("--> ", sbs.toString());
+
         final int[] codepoints = sbs.toString().codePoints().toArray();
         for (int i : codepoints) {
             if (i < Helper.MIN_CODE_POINT || i > Helper.MAX_CODE_POINT) {
-                throw new JebonException("Invalid character in string. CP: " + i + "/");
+
+                int[] i0 = sbs.toString().codePoints().toArray();
+                for (int e : i0) {
+                    Jebon.w(e, " / ", Character.toString(e));
+                }
+
+                throw new JebonException("Invalid character in string. CP: " + i + ".");
             }
         }
     }

@@ -4,14 +4,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.PrimitiveIterator;
 
 public class JSONReader {
 
     private final int queueIndex = 0;
     private final ArrayList<ObjectHandler> objQueue = new ArrayList<>();
-    private final PrimitiveIterator.OfInt chars;
-    //private int index = 0;
+    private final char[] chars;
+    private int index = 0;
 
     private final JebonTree jTree;
 
@@ -23,7 +22,7 @@ public class JSONReader {
 
         try {
             final String s = Files.readString(p);
-            chars = s.codePoints().iterator();
+            chars = s.toCharArray();
 
             final boolean isObj = findOpener();
             jTree = new JebonTree(isObj);
@@ -37,8 +36,7 @@ public class JSONReader {
     public JSONReader(String s) throws JebonException {
 
         try {
-            chars = s.codePoints().iterator();
-
+            chars = s.toCharArray();
             final boolean isObj = findOpener();
             jTree = new JebonTree(isObj);
             readJSON(isObj);
@@ -62,9 +60,9 @@ public class JSONReader {
 
         while (!objQueue.isEmpty()) {
 
-            if (!chars.hasNext()) {
+            if (index >= chars.length) {
                 // queue isn't empty, but we're run out of text.
-                throw new RuntimeException("Syntax error.");
+                throw new RuntimeException("Syntax error");
             }
             // once done the obj is removed
             // no problem.
@@ -72,9 +70,9 @@ public class JSONReader {
         }
 
         // whitespaces after final } or ] are ok.
-        while (chars.hasNext()) {
+        while (index < chars.length) {
 
-            final String c = Character.toString(chars.nextInt());
+            char c = chars[index++];
             if (!Helper.isWhiteSpace(c)) {
                 throw new JebonException("Wayward character(s).");
             }
@@ -83,11 +81,9 @@ public class JSONReader {
 
     private void processObject(ObjectHandler o) throws JebonException {
 
-        while (chars.hasNext()) {
+        while (index < chars.length) {
 
-            final int codePoint = chars.nextInt();
-
-            final String c = Character.toString(codePoint);
+            final char c = chars[index++];
             // found a new object
             // we process it.
             final ObjectHandler.ReturnFlag f = o.update(c);
@@ -110,22 +106,26 @@ public class JSONReader {
 
     private boolean findOpener() throws JebonException {
 
-        while (chars.hasNext()) {
+        while (index < chars.length) {
 
-            final String c = Character.toString(chars.nextInt());
+            final char c = chars[index++];
             if (Helper.isWhiteSpace(c)) {
                 continue;
             }
 
-            if (c.equals("{")) {
+            if (c == '{') {
                 return true;
             }
 
-            if (c.equals("[")) {
+            if (c == '[') {
                 return false;
             }
         }
         throw new JebonException("Probably invalid JSON.");
+    }
+
+    protected JSONItem getItem(String... key) {
+        return jTree.getItem(key);
     }
 
     public String toString() {

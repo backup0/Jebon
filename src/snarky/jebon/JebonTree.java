@@ -17,12 +17,13 @@ class JebonTree {
 
     protected int addItem(int objIndex, JSONItem item) {
 
-        final boolean isObj = item.getType() == JSONTypes.OBJECT || item.getType() == JSONTypes.ARRAY;
+        final boolean isObj = (item.getType() == JSONTypes.OBJECT) || item.getType() == JSONTypes.ARRAY;
         if (isObj) {
             return storeObject(objIndex, item);
         }
         else {
-            return storePrimitive(objIndex,item);
+            storePrimitive(objIndex, item);
+            return NON_OBJECT;
         }
     }
 
@@ -46,15 +47,13 @@ class JebonTree {
         return index;
     }
 
-    private int storePrimitive(int objIndex, JSONItem item) {
+    private void storePrimitive(int objIndex, JSONItem item) {
         final JebonContainer obj = nodes.get(objIndex);
         obj.put(item.getName(), item);
-
-        return NON_OBJECT;
     }
 
     protected JSONItem getItem(String... key) {
-        // todo: probably don't need this.... probabky do ...
+
         final ArrayList<String> keys = new ArrayList<>(Arrays.asList(key));
         final String lastKey = keys.remove(keys.size() - 1);
 
@@ -84,15 +83,20 @@ class JebonTree {
             return null;
         }
 
+        final JSONItem rtnVal;
         if (lastObj instanceof Integer) {
             // meaning this is an object - retrieve the object, and pass back list of keys
-            Jebon.w("Ok itz an object ...");
-
             final JebonContainer val = nodes.get((int) lastObj);
             final String[] valKeys = val.keySet().toArray(new String[0]);
-            return (new JSONItem(lastKey,JSONTypes.OBJECT, valKeys));
+            // if it's an array ... the keys are numbers?
+            final JSONTypes type =  val.isObject() ? JSONTypes.OBJECT : JSONTypes.ARRAY;
+            rtnVal = new JSONItem(lastKey, type, valKeys);
         }
-        return (JSONItem) lastObj;
+        else {
+            rtnVal = (JSONItem) lastObj;
+        }
+
+        return rtnVal;
     }
 
     public String toString () {

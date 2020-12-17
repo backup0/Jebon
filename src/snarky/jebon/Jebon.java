@@ -9,7 +9,25 @@ public class Jebon {
     private void doThing() throws JebonException {
 
         Path p = Paths.get("D:\\etemp\\json-exp.json" );
-        w(new JSONReader(p));
+        //Path p = Paths.get("D:\\etemp\\j-large.json" );
+
+        JSONReader jr = new JSONReader(p);
+        JSONItem item = jr.getItem("obj");
+        w(item.getValue());
+        String x = (String) item.getValue();
+        char[] e = x.toCharArray();
+        w(Character.isHighSurrogate(e[0]));
+        w(Character.isLowSurrogate(e[1]));
+        StringBuffer xyz = new StringBuffer();
+        xyz.append(e[0]);
+        xyz.append(e[1]);
+        w(xyz.toString());
+        /*
+        if (item != null) {
+            w(item.getType());
+            //w(Arrays.toString((String[]) item.getValue()));
+        }
+         */
     }
 
     public static void main(String[] args)

@@ -219,7 +219,7 @@ public class JSONCreator {
      */
     private String intAsNameCheck(String name) {
 
-        final String c = Character.toString(name.codePointAt(0));
+        final char c = name.charAt(0);
         // what if string = 0?
         // error - can we use empty string as name? Don't think so.
         // so this will throw exception if name length is 0.
@@ -228,8 +228,8 @@ public class JSONCreator {
         }
 
         boolean isNumber = false;
-        for (int i : c.codePoints().toArray()) {
-            isNumber = Helper.isNumber(Character.toString(i));
+        for (char nc : name.toCharArray()) {
+            isNumber = Helper.isNumber(nc);
             if (!isNumber) {
                 break;
             }

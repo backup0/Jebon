@@ -5,35 +5,34 @@ class Helper {
     protected static final int MIN_CODE_POINT = 0x0020;
     protected static final int MAX_CODE_POINT = 0x10ffff;
 
-    protected static boolean isWhiteSpace(String c) {
+    protected static boolean isWhiteSpace(char c) {
 
-        final int codePoint = c.codePointAt(0);
-        final int[] whiteSpaceChars = new int[]{0x0020, 0x000A, 0x000D, 0x0009};
-        for (int ws : whiteSpaceChars) {
-            if (codePoint == ws) {
+        final char[] ws = new char[]{0x0020, 0x000A, 0x000D, 0x0009};
+        for (char c0 : ws) {
+            if (c0 == c) {
                 return true;
             }
         }
         return false;
     }
 
-    protected static boolean isNumber(String c) {
+    protected static boolean isNumber(char c) {
 
-        final String[] nums = new String[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        final char[] nums = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
-        for (String n : nums) {
-            if (n.equalsIgnoreCase(c)) {
+        for (char n : nums) {
+            if (c == n) {
                 return true;
             }
         }
         return false;
     }
 
-    protected static boolean isTerminator(String c) {
+    protected static boolean isTerminator(char c) {
 
-        final String[] terms = new String[] {"}", "]", ","};
-        for (String s : terms) {
-            if (s.equals(c)) {
+        final char[] terminators = new char[] {'}', ']', ','};
+        for (char ct : terminators) {
+            if (c == ct) {
                 return true;
             }
         }

@@ -21,7 +21,7 @@ class ObjectHandler {
     private Finder valueReader = null;
     private StringFinder nameReader = null;
     // if this is an array, this is the 'name'
-    private int arrayIndex = 0;
+    private int arrayIndex = -1;
 
     // when we encounter object/array, a tree node is create
     // this is the index of that node.
@@ -41,7 +41,7 @@ class ObjectHandler {
         this.treeIndex = treeIndex;
     }
 
-    protected ReturnFlag update(String c) throws JebonException {
+    protected ReturnFlag update(char c) throws JebonException {
 
         final ReturnFlag rtn;
         switch (op) {
@@ -71,7 +71,7 @@ class ObjectHandler {
         return rtn;
     }
 
-    private ReturnFlag readValue(String c) throws JebonException {
+    private ReturnFlag readValue(char c) throws JebonException {
 
         if (valueReader == null) {
             throw new RuntimeException();
@@ -87,7 +87,7 @@ class ObjectHandler {
             // we've found the value
             interpretValue();
             // c is the terminator ...
-            if (c.equals(",")) {
+            if (c == ',') {
                 // we expect another value next
                 op = isObject ? Operations.FIND_NAME_START :  Operations.DETERMINE_VAL_TYPE;
                 rtn = ReturnFlag.CONTINUE;
@@ -104,7 +104,7 @@ class ObjectHandler {
         return rtn;
     }
 
-    private ReturnFlag findObjectEnding(String c) throws JebonException {
+    private ReturnFlag findObjectEnding(char c) throws JebonException {
         // the value is an object(or an array)
         // this is handled by an instance of this class, when read is done, we try to find the terminator
         if (Helper.isWhiteSpace(c)) {
@@ -112,7 +112,7 @@ class ObjectHandler {
         }
 
         final ReturnFlag rtn;
-        if (c.equals(",")) {
+        if (c == ',') {
             // we expect another value next
             op = isObject ? Operations.FIND_NAME_START :  Operations.DETERMINE_VAL_TYPE;
             rtn = ReturnFlag.CONTINUE;
@@ -159,13 +159,13 @@ class ObjectHandler {
         }
     }
 
-    private ReturnFlag findTheStartOfName(String c) throws JebonException {
+    private ReturnFlag findTheStartOfName(char c) throws JebonException {
         // while reading name space is allowed.
         if (Helper.isWhiteSpace(c)) {
             return ReturnFlag.CONTINUE;
         }
 
-        if ((nameReader == null) && (c.equals("}"))) {
+        if ((nameReader == null) && (c == '}')) {
             // this is an empty object
             // name reader is assigned after we've found "
             return ReturnFlag.DONE;
@@ -177,7 +177,7 @@ class ObjectHandler {
         // the 2nd and subsequent 'rounds' are triggered by ','. If ',' terminates a value field, we expect another
         // value field, } or ] ends this object, so this will no be called again.
 
-        if (c.equalsIgnoreCase("\"")) {
+        if (c == '"') {
             // ok - we've found the starting point ..
             nameReader = new StringFinder();
             op = Operations.READ_NAME;
@@ -188,7 +188,7 @@ class ObjectHandler {
         return ReturnFlag.CONTINUE;
     }
 
-    private void readName(String c) throws JebonException {
+    private void readName(char c) throws JebonException {
         // pass the value to string reader
         // ..
         // found string?
@@ -198,12 +198,12 @@ class ObjectHandler {
         }
     }
 
-    private void findColon(String c) throws JebonException {
+    private void findColon(char c) throws JebonException {
         if (Helper.isWhiteSpace(c)) {
             return;
         }
 
-        if (c.equals(":")) {
+        if (c == ':') {
             // ok
             op = Operations.DETERMINE_VAL_TYPE;
         }
@@ -213,13 +213,14 @@ class ObjectHandler {
         }
     }
 
-    private ReturnFlag determineValueType(String c) throws JebonException {
+    private ReturnFlag determineValueType(char c) throws JebonException {
 
         if (Helper.isWhiteSpace(c)) {
             return ReturnFlag.CONTINUE;
         }
 
-        if (arrayIndex == 0 && c.equals("]")) {
+        // empty array ...
+        if (arrayIndex == -1 && c == ']') {
             return ReturnFlag.DONE;
         }
 
@@ -231,7 +232,7 @@ class ObjectHandler {
         }
 
         // - is for the start of negative number
-        if (Helper.isNumber(c) || c.equals("-")) {
+        if (Helper.isNumber(c) || c == '-') {
             // process number
             valueReader = new NumberFinder();
             valueReader.update(c);
@@ -239,24 +240,24 @@ class ObjectHandler {
         }
 
         final ReturnFlag rtn;
-        switch (c.toLowerCase()) {
-            case "{":
+        switch (c) {
+            case '{':
                 rtn = ReturnFlag.OBJECT;
                 lastChild = jsonTree.addItem(treeIndex, new JSONItem(getName(), JSONTypes.OBJECT, null));
                 op = Operations.FIND_OBJ_END;
                 break;
-            case "[":
+            case '[':
                 rtn = ReturnFlag.ARRAY;
                 lastChild = jsonTree.addItem(treeIndex, new JSONItem(getName(), JSONTypes.ARRAY, null));
                 op = Operations.FIND_OBJ_END;
                 break;
-            case "\"":
+            case '\"':
                 valueReader = new StringFinder();
                 rtn = ReturnFlag.CONTINUE;
                 break;
-            case "t":
-            case "f":
-            case "n":
+            case 't':
+            case 'f':
+            case 'n':
                 // true, false, null
                 valueReader = new TFNRFinder();
                 valueReader.update(c);
@@ -268,19 +269,19 @@ class ObjectHandler {
         return rtn;
     }
 
-    private void checkTerminator(String c) throws JebonException {
+    private void checkTerminator(char c) throws JebonException {
 
         final boolean ok;
         if (isObject) {
             // if this is an object
             // true if c == } - everything else is false.
-            ok = c.equals("}");
+            ok = c == '}';
         }
         else {
             // if this is an array (not object)
             // true if c == ]
             // everything else is bad.
-            ok = c.equals("]");
+            ok = c == ']';
         }
 
         if (!ok) {
