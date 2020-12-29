@@ -54,6 +54,10 @@ class JebonTree {
 
     protected JSONItem getItem(String... key) {
 
+        if (key.length == 0) {
+            return getRootItem();
+        }
+
         final ArrayList<String> keys = new ArrayList<>(Arrays.asList(key));
         final String lastKey = keys.remove(keys.size() - 1);
 
@@ -97,6 +101,14 @@ class JebonTree {
         }
 
         return rtnVal;
+    }
+
+    private JSONItem getRootItem() {
+        final JebonContainer obj = nodes.get(ROOT_INDEX);
+        final String[] valKeys = obj.keySet().toArray(new String[0]);
+        // if it's an array ... the keys are numbers?
+        final JSONTypes type =  obj.isObject() ? JSONTypes.OBJECT : JSONTypes.ARRAY;
+        return new JSONItem("", type, valKeys);
     }
 
     public String toString () {

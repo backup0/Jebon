@@ -20,6 +20,7 @@ public class JSONCreator {
      * @param val
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
+     * @throws JebonException If key or value is invalid.
      */
     public void put(String val, String... keys) throws JebonException {
         putItem(new JSONItem("", JSONTypes.STRING, val), keys);
@@ -30,6 +31,7 @@ public class JSONCreator {
      * @param val
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
+     * @throws JebonException If key or value is invalid.
      */
     public void put(double val, String... keys) throws JebonException {
         putItem(new JSONItem("", JSONTypes.NUMBER, val), keys);
@@ -40,6 +42,7 @@ public class JSONCreator {
      * @param val
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
+     * @throws JebonException If key or value is invalid.
      */
     public void put(boolean val, String... keys) throws JebonException {
         putItem(new JSONItem("", JSONTypes.BOOLEAN, val), keys);
@@ -50,6 +53,7 @@ public class JSONCreator {
      * @param val
      * @param keys
      * @throws IndexOutOfBoundsException if key is empty.
+     * @throws JebonException If key or value is invalid.
      */
     public void put(SpecialType val, String... keys) throws JebonException {
         switch (val) {
