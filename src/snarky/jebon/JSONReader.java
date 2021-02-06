@@ -14,10 +14,20 @@ public class JSONReader {
 
     private final JebonTree jTree;
 
+    /**
+     *
+     * @param b
+     * @throws JebonException
+     */
     public JSONReader(byte[] b) throws JebonException {
         this(new String(b, StandardCharsets.UTF_8));
     }
 
+    /**
+     *
+     * @param p
+     * @throws JebonException
+     */
     public JSONReader(Path p) throws JebonException {
 
         try {
@@ -33,6 +43,11 @@ public class JSONReader {
         }
     }
 
+    /**
+     *
+     * @param s
+     * @throws JebonException
+     */
     public JSONReader(String s) throws JebonException {
 
         try {
@@ -124,7 +139,12 @@ public class JSONReader {
         throw new JebonException("Probably invalid JSON.");
     }
 
-    protected JSONItem getItem(String... key) {
+    /**
+     *
+     * @param key
+     * @return
+     */
+    public JSONItem getItem(String... key) {
         return jTree.getItem(key);
     }
 

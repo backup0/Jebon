@@ -3,7 +3,6 @@ package snarky.jebon;
 class TFNRFinder extends Finder {
 
     // todo: probably not 100% correct here ...
-
     // true, false, or null
     private final StringBuilder sbs = new StringBuilder();
     private JSONItem rtnVal = null;

@@ -59,6 +59,7 @@ class StringFinder extends Finder {
     private void processEscapedChar(char c) throws JebonException {
 
         // ",\, /, b, f, n, r, t, uhex
+        // no big cap.
         final char[] escChars = new char[]{'u', '"', '\\', '/', 'b', 'f', 'n', 'r', 't'};
         boolean ok = false;
         for (char o : escChars) {
@@ -87,17 +88,18 @@ class StringFinder extends Finder {
         switch (c) {
             case '"':
                 // opening " isn't sent to this class.
+                // must be the end. Unless it's escaped, we treat this as the end of string,
+                // still not the end of field.
                 charTypeToSearch = CharacterTypes.TERMINATOR;
-                //validateString();
                 stringRead = true;
                 break;
             case '\\':
                 charTypeToSearch = CharacterTypes.ESCAPE;
                 break;
             default:
+                // no need to set char type to search because it is already ANY.
                 sbs.append(c);
                 break;
-                
         }
     }
 
@@ -135,29 +137,26 @@ class StringFinder extends Finder {
 
     private void processUnicodeLow(char c) throws JebonException {
 
-        final String unicodeBuffer2Flag = "?";
         if (unicodeBuffer2.length() > 0) {
             // we've already flagged this.
-            if (unicodeBuffer2.toString().equals(unicodeBuffer2Flag)) {
-                // we set this when we found \
-                // next item expected is u;
-                // which is unicode escape ???
-                unicodeBuffer2.setLength(0);
-                // the buffer has to be reset anyway whether we're looking for low surrogate or else.
-                if (c == 'u') {
-                    // search unicode character as usual
-                    charTypeToSearch = CharacterTypes.UNICODE;
-                }
-                else {
-                    // other escaped character
-                    // write back whatever in the first buffer.
-                    writeOrphanSurrogate();
-                    charTypeToSearch = CharacterTypes.ESCAPE;
-                    processEscapedChar(c);
-                }
+            // we set this when we found \
+            // next item expected is u;
+            // which is unicode escape ???
+            unicodeBuffer2.setLength(0);
+            // the buffer has to be reset anyway whether we're looking for low surrogate or else.
+            if (c == 'u') {
+                // search unicode character
+                charTypeToSearch = CharacterTypes.UNICODE;
             }
             else {
-                throw new RuntimeException("Program error.");
+                // other escaped character
+                // write back whatever in the first buffer.
+                // rest both - w're done with this.
+                writeOrphanSurrogate();
+                unicodeBuffer1.setLength(0);
+                unicodeBuffer2.setLength(0);
+                charTypeToSearch = CharacterTypes.ESCAPE;
+                processEscapedChar(c);
             }
         }
         else {
@@ -165,13 +164,14 @@ class StringFinder extends Finder {
             // anything else is not escape character.
             if (c == '\\') {
                 // 'flag it'
-                unicodeBuffer2.append(unicodeBuffer2Flag);
+                unicodeBuffer2.append("flag");
             }
             else {
                 // any other character
                 // there's no surrogate
                 // the 2nd buffer is still empty.
                 writeOrphanSurrogate();
+                unicodeBuffer1.setLength(0);
                 charTypeToSearch = CharacterTypes.ANY;
                 processAnyCharacter(c);
             }
@@ -186,13 +186,16 @@ class StringFinder extends Finder {
 
     private void processUniCode(char c) throws JebonException {
 
-        // method throws exception
-        checkIfCharLegal(c);
-
         if (unicodeBuffer1.length() < 4) {
             unicodeBuffer1.append(c);
             if (unicodeBuffer1.length() == 4) {
-                final int codePoint = Integer.parseInt(unicodeBuffer1.toString(), 16);
+                final int codePoint;
+                try {
+                    codePoint = Integer.parseInt(unicodeBuffer1.toString(), 16);
+                }
+                catch (Exception e) {
+                    throw new JebonException(e.getMessage());
+                }
 
                 if (codePoint < Helper.MIN_CODE_POINT) {
                     throw new JebonException("Illegal character.");
@@ -202,19 +205,27 @@ class StringFinder extends Finder {
                     sbs.append(Character.toString(codePoint));
                     unicodeBuffer1.setLength(0);
                     unicodeBuffer2.setLength(0);
+                    charTypeToSearch = CharacterTypes.ANY;
                 }
-                // else we keep the first part.
-                // either; we're @ the end of this.
-                charTypeToSearch = CharacterTypes.ANY;
+                else {
+                    charTypeToSearch = CharacterTypes.UNICODE_LOW;
+                }
             }
         }
         else {
+            // first buffer read
             unicodeBuffer2.append(c);
             // we've read all 4; now
             if (unicodeBuffer2.length() == 4) {
-                final char c1 = Character.highSurrogate(Integer.parseInt(unicodeBuffer1.toString(), 16));
-                final char c2 = Character.lowSurrogate(Integer.parseInt(unicodeBuffer2.toString(), 16));
-                final int codePoint = Character.toCodePoint(c1, c2);
+                final int codePoint;
+                try {
+                    final char c1 = Character.highSurrogate(Integer.parseInt(unicodeBuffer1.toString(), 16));
+                    final char c2 = Character.lowSurrogate(Integer.parseInt(unicodeBuffer2.toString(), 16));
+                    codePoint = Character.toCodePoint(c1, c2);
+                }
+                catch (Exception e) {
+                    throw new JebonException(e.getMessage());
+                }
 
                 if (codePoint < Helper.MIN_CODE_POINT || codePoint > Helper.MAX_CODE_POINT) {
                     throw new JebonException("Illegal character.");
@@ -223,43 +234,6 @@ class StringFinder extends Finder {
                 unicodeBuffer1.setLength(0);
                 unicodeBuffer2.setLength(0);
                 charTypeToSearch = CharacterTypes.ANY;
-            }
-        }
-    }
-
-    private void checkIfCharLegal(char c) throws JebonException {
-
-        final char[] allowedChars;
-        allowedChars = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-        boolean ok = false;
-        for (char ac : allowedChars) {
-            // hex, any case should be fine
-            if (c == ac) {
-                ok = true;
-                break;
-            }
-        }
-
-        if (!ok) {
-            // wrong
-            throw new JebonException("Illegal hex character: " + c + ".");
-        }
-    }
-
-    private void validateString() throws JebonException {
-
-        //Jebon.w("--> ", sbs.toString());
-
-        final int[] codepoints = sbs.toString().codePoints().toArray();
-        for (int i : codepoints) {
-            if (i < Helper.MIN_CODE_POINT || i > Helper.MAX_CODE_POINT) {
-
-                int[] i0 = sbs.toString().codePoints().toArray();
-                for (int e : i0) {
-                    Jebon.w(e, " / ", Character.toString(e));
-                }
-
-                throw new JebonException("Invalid character in string. CP: " + i + ".");
             }
         }
     }
@@ -276,7 +250,6 @@ class StringFinder extends Finder {
 
     @Override
     protected JSONItem getValue() {
-
         return rtnValue;
     }
 }

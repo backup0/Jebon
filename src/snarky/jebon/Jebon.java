@@ -1,6 +1,7 @@
 package snarky.jebon;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
@@ -8,6 +9,36 @@ public class Jebon {
 
     private void doThing() throws JebonException {
 
+        // Chceks.
+
+        try {
+            String s = Files.readString(Paths.get("D:\\etemp\\json-string-test.txt" )) + "\"";
+            StringFinder sf = new StringFinder();
+
+            for (char c : s.toCharArray()) {
+                sf.update(c);
+            }
+            w(sf.getString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        /*
+        JSONCreator jkar = new JSONCreator(true);
+        jkar.put(123.45, "point", "is", "taken", "@1");
+        jkar.put(SpecialType.JSONNull, "point", "is", "taken", "kll-you");
+        jkar.put(true, "point", "is", "taken", "@t");
+        jkar.put(false, "point", "is", "taken", "@you");
+        jkar.put(11, "point", "is", "taken", "aray", "0");
+        jkar.put(12, "point", "is", "taken", "aray", "1");
+        jkar.put(13, "point", "is", "taken", "aray", "2");
+        jkar.put(14, "point", "is", "taken", "aray", "3");
+        w(jkar);
+        */
+
+        /*
         Path p = Paths.get("D:\\etemp\\json-exp.json" );
         //Path p = Paths.get("D:\\etemp\\j-large.json" );
 

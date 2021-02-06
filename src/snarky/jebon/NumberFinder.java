@@ -11,7 +11,14 @@ class NumberFinder extends Finder {
 
         if (Helper.isTerminator(c)) {
             // if terminator end immediately, we've read the entire field
-            rtnVal = new JSONItem("", JSONTypes.NUMBER, Double.parseDouble(sbs.toString()));
+            final double val;
+            try {
+                val = Double.parseDouble(sbs.toString());
+            }
+            catch (Exception e) {
+                throw new JebonException(e.getMessage());
+            }
+            rtnVal = new JSONItem("", JSONTypes.NUMBER, val);
             return;
         }
 
