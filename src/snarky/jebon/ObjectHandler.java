@@ -85,6 +85,7 @@ class ObjectHandler {
         // terminator being ',', } or ].
         if (item != null) {
             // we've found the value
+            // this only happens if c is a 'terminator'
             interpretValue();
             // c is the terminator ...
             if (c == ',') {
@@ -181,11 +182,12 @@ class ObjectHandler {
             // ok - we've found the starting point ..
             nameReader = new StringFinder();
             op = Operations.READ_NAME;
+            return ReturnFlag.CONTINUE;
         }
         else {
             throw new JebonException("Unexpected character.");
         }
-        return ReturnFlag.CONTINUE;
+
     }
 
     private void readName(char c) throws JebonException {

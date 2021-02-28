@@ -1,6 +1,5 @@
 package snarky.jebon;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,17 +14,8 @@ public class JSONReader {
     private final JebonTree jTree;
 
     /**
-     *
-     * @param b
-     * @throws JebonException
-     */
-    public JSONReader(byte[] b) throws JebonException {
-        this(new String(b, StandardCharsets.UTF_8));
-    }
-
-    /**
-     *
-     * @param p
+     * Create json reader.
+     * @param p Path to json file.
      * @throws JebonException
      */
     public JSONReader(Path p) throws JebonException {
@@ -44,8 +34,8 @@ public class JSONReader {
     }
 
     /**
-     *
-     * @param s
+     * Create json reader.
+     * @param s The json.
      * @throws JebonException
      */
     public JSONReader(String s) throws JebonException {
@@ -76,7 +66,7 @@ public class JSONReader {
         while (!objQueue.isEmpty()) {
 
             if (index >= chars.length) {
-                // queue isn't empty, but we're run out of text.
+                // queue isn't empty, but we've run out of text.
                 throw new RuntimeException("Syntax error");
             }
             // once done the obj is removed
@@ -131,24 +121,46 @@ public class JSONReader {
             if (c == '{') {
                 return true;
             }
-
-            if (c == '[') {
+            else if (c == '[') {
                 return false;
+            }
+            else {
+                break;
             }
         }
         throw new JebonException("Probably invalid JSON.");
     }
 
     /**
+     * Get the value assigned to 'key'. the key is the full 'path' to the item,
+     * that is the name of the field preceded by the names of all the nested objects.
+     * For example <code>getItem("email", "work")</code> means get the value for the field
+     * "work" which is inside the object "email", which is inside the root object.</p>
+     * <br>
+     * Suppose we have the following json
+     * <pre>
+     * {
+     * 	"email" :  {
+     * 		"work" : "email@domain", "personal" : "email2@domain", ..
+     *    }, ..
+     * }
+     * </pre>the aforementioned method call will return "email@domain".
+     * <br><br>
+     * Values inside arrays can be retrieved in the same way,
+     * the last item in the path is the index. For example <code>getItem("email", "1")</code>
+     * means get the value inside an array "email" at index "1".
+     * <br>
+     * Suppose we have the following json
+     * <pre>
+     * {
+     * 	"email" :  ["email1@domain", "email2@domain", ....], ..
+     * }
+     * </pre>the method call will return "email2@domain".
      *
-     * @param key
-     * @return
+     * @param key The key.
+     * @return The value associated with the key wrapped inside <code>JSONItem</code> object.
      */
     public JSONItem getItem(String... key) {
         return jTree.getItem(key);
-    }
-
-    public String toString() {
-        return jTree.toString();
     }
 }

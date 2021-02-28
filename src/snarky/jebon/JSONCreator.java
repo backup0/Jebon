@@ -3,22 +3,30 @@ package snarky.jebon;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * Class for creating json.
+ */
 public class JSONCreator {
 
     private final JebonTree jTree;
 
     /**
-     *
-     * @param object
+     * Create json writer. If <code>object</code> is set to true
+     * the root will be an object, else the root will be an array.
+     * @param object Type of root item; true = object, false = array.
      */
     public JSONCreator(boolean object) {
         jTree = new JebonTree(object);
     }
 
     /**
-     *
-     * @param val
-     * @param keys
+     * <p>Put String value.</p>
+     * <p>
+     * <code>keys</code> is the full path to the item. If nested objects
+     * do not exist they will be created.
+     * </p>
+     * @param val The value.
+     * @param keys Full 'path' to the item.
      * @throws IndexOutOfBoundsException if key is empty.
      * @throws JebonException If key or value is invalid.
      */
@@ -27,9 +35,13 @@ public class JSONCreator {
     }
 
     /**
-     *
-     * @param val
-     * @param keys
+     * <p>Put double value.</p>
+     * <p>
+     * <code>keys</code> is the full path to the item. If nested objects
+     * do not exist they will be created.
+     * </p>
+     * @param val The value.
+     * @param keys Full 'path' to the item.
      * @throws IndexOutOfBoundsException if key is empty.
      * @throws JebonException If key or value is invalid.
      */
@@ -38,9 +50,13 @@ public class JSONCreator {
     }
 
     /**
-     *
-     * @param val
-     * @param keys
+     * <p>Put boolean value.</p>
+     * <p>
+     * <code>keys</code> is the full path to the item. If nested objects
+     * do not exist they will be created.
+     * </p>
+     * @param val The value.
+     * @param keys Full 'path' to the item.
      * @throws IndexOutOfBoundsException if key is empty.
      * @throws JebonException If key or value is invalid.
      */
@@ -49,9 +65,16 @@ public class JSONCreator {
     }
 
     /**
+     * <p>Put 'special' json value.<br>
+     * <code>keys</code> is the full path to the item. If nested objects
+     * do not exist they will be created.
+     * </p>
+     * <br><code>SpecialTypes.JSONObject</code>: empty object.
+     * <br><code>SpecialTypes.JSONArray</code>: empty array.
+     * <br><code>SpecialTypes.JSONNull</code>: null
      *
-     * @param val
-     * @param keys
+     * @param val The value.
+     * @param keys Full 'path' to the item.
      * @throws IndexOutOfBoundsException if key is empty.
      * @throws JebonException If key or value is invalid.
      */
