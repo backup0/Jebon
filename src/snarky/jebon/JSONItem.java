@@ -9,7 +9,7 @@ public class JSONItem {
     private final JSONTypes type;
     private final Object value;
 
-    public JSONItem(String name, JSONTypes type, Object value) {
+    protected JSONItem(String name, JSONTypes type, Object value) {
         this.name = name;
         this.type = type;
         this.value = value;

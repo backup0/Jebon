@@ -16,7 +16,7 @@ public class JSONReader {
     /**
      * Create json reader.
      * @param p Path to json file.
-     * @throws JebonException
+     * @throws JebonException if json is invalid.
      */
     public JSONReader(Path p) throws JebonException {
 
@@ -36,7 +36,7 @@ public class JSONReader {
     /**
      * Create json reader.
      * @param s The json.
-     * @throws JebonException
+     * @throws JebonException if json is invalid.
      */
     public JSONReader(String s) throws JebonException {
 
@@ -132,7 +132,7 @@ public class JSONReader {
     }
 
     /**
-     * Get the value assigned to 'key'. the key is the full 'path' to the item,
+     * Get the value assigned to 'key'. The <i>key</i> is the full 'path' to the item,
      * that is the name of the field preceded by the names of all the nested objects.
      * For example <code>getItem("email", "work")</code> means get the value for the field
      * "work" which is inside the object "email", which is inside the root object.</p>

@@ -1,3 +1,3 @@
-module Jebon {
+module snarkyJebon {
     exports snarky.jebon;
 }
