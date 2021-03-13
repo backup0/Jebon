@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class Jebon {
 
-    private void doThing() throws Exception {
+    private void doThing() {
     }
 
     public static void main(String[] args)
